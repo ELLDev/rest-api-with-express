@@ -18,10 +18,11 @@ router.get(
   "/",
   authenticateUser,
   asyncHandler(async (req, res) => {
-    let users;
+    let user;
     try {
-      users = await User.findAll();
-      res.status(200).send(users);
+      user = req.currentUser;
+      res.location('/');
+      res.status(200).send(user);
     } catch (error) {
       res.status(400).send(error);
     }

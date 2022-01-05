@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const Course = require("../models").Course;
+const User = require("../models").User;
+
 const { authenticateUser } = require("../middleware/auth-user");
 
 function asyncHandler(cb) {
@@ -18,9 +20,17 @@ router.get(
   "/",
   asyncHandler(async (req, res) => {
     let courses;
+    let course;
+    let user;
     try {
+      templateData = [];
       courses = await Course.findAll();
-      templateData = { courses };
+      for (let i = 0; i < courses.length; i++) {
+        course = courses[i];
+        user = await User.findByPk(courses[i].userId);
+        pair = { course, user };
+        templateData.push(pair);
+      }
       res.status(200).send(templateData);
     } catch (error) {
       res.status(400).send(error);
@@ -32,10 +42,11 @@ router.get(
   "/:id",
   asyncHandler(async (req, res) => {
     let course;
-
+    let user;
     try {
       course = await Course.findByPk(req.params.id);
-      templateData = { course };
+      user = await User.findByPk(course.userId);
+      templateData = { course, user };
       res.status(200).send(templateData);
     } catch {
       res.status(404).json({ message: "Course not found." });
@@ -50,7 +61,7 @@ router.post(
     let course;
     try {
       course = await Course.create(req.body);
-      res.redirect(`/api/courses/${course.id}`);
+      res.location(`/api/courses/${course.id}`);
       res.status(201).end();
     } catch (error) {
       console.log("ERROR: ", error.name);

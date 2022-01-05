@@ -21,7 +21,6 @@ router.get(
     let user;
     try {
       user = req.currentUser;
-      res.location('/');
       res.status(200).send(user);
     } catch (error) {
       res.status(400).send(error);
@@ -35,6 +34,7 @@ router.post(
     let user;
     try {
       user = await User.create(req.body);
+      res.location("/");
       res.status(201).end();
     } catch (error) {
       console.log("ERROR: ", error.name);

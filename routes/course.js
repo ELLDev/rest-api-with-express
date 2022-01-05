@@ -20,20 +20,18 @@ router.get(
   "/",
   asyncHandler(async (req, res) => {
     let courses;
-    let course;
-    let user;
     try {
-      templateData = [];
-      courses = await Course.findAll();
-      for (let i = 0; i < courses.length; i++) {
-        course = courses[i];
-        user = await User.findByPk(courses[i].userId);
-        pair = { course, user };
-        templateData.push(pair);
-      }
-      res.status(200).send(templateData);
+      courses = await Course.findAll({
+        include: [
+          {
+            model: User,
+            as: "users",
+          },
+        ],
+      });
+      res.status(200).send({ courses });
     } catch (error) {
-      res.status(400).send(error);
+      res.status(400).send(error.toString());
     }
   })
 );
@@ -42,12 +40,19 @@ router.get(
   "/:id",
   asyncHandler(async (req, res) => {
     let course;
-    let user;
     try {
-      course = await Course.findByPk(req.params.id);
-      user = await User.findByPk(course.userId);
-      templateData = { course, user };
-      res.status(200).send(templateData);
+      course = await Course.findOne({
+        where: {
+          id: req.params.id,
+        },
+        include: [
+          {
+            model: User,
+            as: "users",
+          },
+        ],
+      });
+      res.status(200).send({ course });
     } catch {
       res.status(404).json({ message: "Course not found." });
     }
